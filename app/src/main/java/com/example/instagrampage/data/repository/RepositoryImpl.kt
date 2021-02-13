@@ -12,15 +12,13 @@ class RepositoryImpl(
     private val localDataSource: LocalDataSource
 ) : Repository {
 
-    private val TAG = "RepositoryImpl"
-
     override fun getPosts(amount: Int): Flow<Result<List<Post>>> = flow {
-        emit(Result.Loading())
+        emit(Result.loading<List<Post>>())
         emitAll(localDataSource.getPosts(amount))
     }
 
     override fun getStories(): Flow<Result<List<Story>>> = flow {
-        emit(Result.Loading())
+        emit(Result.loading<List<Story>>())
         emitAll(localDataSource.getStories())
     }
 

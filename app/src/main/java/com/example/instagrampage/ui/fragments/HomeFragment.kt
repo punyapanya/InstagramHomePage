@@ -56,10 +56,12 @@ class HomeFragment : Fragment() {
 
     private fun setupObservers() {
         viewModel.stories.observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is Result.Loading -> Log.d(TAG, "setupObservers: Loading state of stories")
-                is Result.Success -> {
-                    Log.d(TAG, "setupObservers: Success state of stories ${result.data.size}")
+            when (result.status) {
+                Result.Status.LOADING -> {
+                    Log.d(TAG, "setupObservers: Loading state of stories")
+                }
+                Result.Status.SUCCESS -> {
+                    Log.d(TAG, "setupObservers: Success state of stories ${result.data!!.size}")
                     mStories = PostAdapter.Item.HeaderItem(result.data)
                     val items = when (rvAdapter.currentList.size) {
                         0, 1 -> createListOfItems(mStories, listOf(), false)
@@ -67,14 +69,18 @@ class HomeFragment : Fragment() {
                     }
                     rvAdapter.submitList(items)
                 }
-                is Result.Error -> Log.d(TAG, "setupObservers: Error state of stories - ${result.message}")
+                Result.Status.ERROR -> {
+                    Log.d(TAG, "setupObservers: Error state of stories - ${result.message}")
+                }
             }
         }
         viewModel.posts.observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is Result.Loading -> Log.d(TAG, "setupObservers: Loading state of posts")
-                is Result.Success -> {
-                    Log.d(TAG, "setupObservers: Success state of posts ${result.data.size}")
+            when (result.status) {
+                Result.Status.LOADING -> {
+                    Log.d(TAG, "setupObservers: Loading state of posts")
+                }
+                Result.Status.SUCCESS -> {
+                    Log.d(TAG, "setupObservers: Success state of posts ${result.data!!.size}")
                     mPosts = result.data.map { PostAdapter.Item.PostItem(it) }
                     val items = when (rvAdapter.currentList.size) {
                         0 -> createListOfItems(PostAdapter.Item.HeaderItem(listOf()), mPosts, true)
@@ -84,7 +90,9 @@ class HomeFragment : Fragment() {
                         if (bnd.rvHome.adapter == null) bnd.rvHome.adapter = rvAdapter
                     }
                 }
-                is Result.Error -> Log.d(TAG, "setupObservers: Error state of posts - ${result.message}")
+                Result.Status.ERROR -> {
+                    Log.d(TAG, "setupObservers: Error state of posts - ${result.message}")
+                }
             }
         }
     }
@@ -124,26 +132,10 @@ class HomeFragment : Fragment() {
         app.appComponent.inject(this)
     }
 
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG, "onStop: ")
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        Log.d(TAG, "onSaveInstanceState: ")
-    }
-    
     override fun onDestroyView() {
         super.onDestroyView()
         bnd.rvHome.adapter = null
         _bnd = null
-        Log.d(TAG, "onDestroyView: ")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d(TAG, "onDestroy: ")
     }
 
     private fun createListOfItems(

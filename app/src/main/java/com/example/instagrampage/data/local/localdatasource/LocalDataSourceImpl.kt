@@ -14,11 +14,11 @@ class LocalDataSourceImpl(
 ) : LocalDataSource {
 
     override fun getPosts(amount: Int): Flow<Result<List<Post>>> {
-        return contentDao.getPosts(amount).map { Result.Success(it) }
+        return contentDao.getPosts(amount).map { Result.success<List<Post>>(it) }
     }
 
     override fun getStories(): Flow<Result<List<Story>>> {
-        return contentDao.getStories().map { Result.Success(it) }
+        return contentDao.getStories().map { Result.success<List<Story>>(it) }
     }
 
     override suspend fun insertPosts(posts: List<Post>) {
