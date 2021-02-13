@@ -19,7 +19,6 @@ import com.example.instagrampage.ui.MainActivity
 import com.example.instagrampage.ui.adapters.PostAdapter
 import com.example.instagrampage.ui.viewmodels.HomeViewModel
 import com.example.instagrampage.ui.viewmodels.HomeViewModelFactory
-import com.example.instagrampage.util.Result
 import javax.inject.Inject
 
 class HomeFragment : Fragment() {
@@ -33,8 +32,6 @@ class HomeFragment : Fragment() {
     @Inject lateinit var repository: Repository
     private lateinit var viewModel: HomeViewModel
     private lateinit var rvAdapter: PostAdapter
-    private var mStories = PostAdapter.Item.HeaderItem(listOf())
-    private var mPosts = listOf<PostAdapter.Item.PostItem>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,44 +52,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.stories.observe(viewLifecycleOwner) { result ->
-            when (result.status) {
-                Result.Status.LOADING -> {
-                    Log.d(TAG, "setupObservers: Loading state of stories")
-                }
-                Result.Status.SUCCESS -> {
-                    Log.d(TAG, "setupObservers: Success state of stories ${result.data!!.size}")
-                    mStories = PostAdapter.Item.HeaderItem(result.data)
-                    val items = when (rvAdapter.currentList.size) {
-                        0, 1 -> createListOfItems(mStories, listOf(), false)
-                        else -> createListOfItems(mStories, mPosts, true)
-                    }
-                    rvAdapter.submitList(items)
-                }
-                Result.Status.ERROR -> {
-                    Log.d(TAG, "setupObservers: Error state of stories - ${result.message}")
-                }
-            }
-        }
-        viewModel.posts.observe(viewLifecycleOwner) { result ->
-            when (result.status) {
-                Result.Status.LOADING -> {
-                    Log.d(TAG, "setupObservers: Loading state of posts")
-                }
-                Result.Status.SUCCESS -> {
-                    Log.d(TAG, "setupObservers: Success state of posts ${result.data!!.size}")
-                    mPosts = result.data.map { PostAdapter.Item.PostItem(it) }
-                    val items = when (rvAdapter.currentList.size) {
-                        0 -> createListOfItems(PostAdapter.Item.HeaderItem(listOf()), mPosts, true)
-                        else -> createListOfItems(mStories, mPosts, true)
-                    }
-                    rvAdapter.submitList(items) {
-                        if (bnd.rvHome.adapter == null) bnd.rvHome.adapter = rvAdapter
-                    }
-                }
-                Result.Status.ERROR -> {
-                    Log.d(TAG, "setupObservers: Error state of posts - ${result.message}")
-                }
+        viewModel.items.observe(viewLifecycleOwner) { items: List<PostAdapter.Item> ->
+            rvAdapter.submitList(items) {
+                if (bnd.rvHome.adapter == null) bnd.rvHome.adapter = rvAdapter
             }
         }
     }
@@ -118,7 +80,7 @@ class HomeFragment : Fragment() {
         }
         rvAdapter = PostAdapter()
         rvAdapter.setHasStableIds(true)
-        rvAdapter.onFooterAttachedCallback = { viewModel.collectPosts() }
+        rvAdapter.onFooterAttachedCallback = { viewModel.collectData() }
         rvAdapter.onStoryClickedCallback = { viewModel.insertStory(it) }
     }
 
@@ -136,15 +98,5 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         bnd.rvHome.adapter = null
         _bnd = null
-    }
-
-    private fun createListOfItems(
-        storiesHeader: PostAdapter.Item.HeaderItem,
-        posts: List<PostAdapter.Item.PostItem>,
-        isFooter: Boolean
-    ): List<PostAdapter.Item> = mutableListOf<PostAdapter.Item>().apply {
-        add(storiesHeader)
-        addAll(posts)
-        if (isFooter) add(PostAdapter.Item.FooterItem)
     }
 }

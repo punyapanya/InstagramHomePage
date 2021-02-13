@@ -1,13 +1,14 @@
 package com.example.instagrampage.ui.viewmodels
 
 import androidx.lifecycle.*
-import com.example.instagrampage.data.local.db.entities.Post
 import com.example.instagrampage.data.local.db.entities.Story
 import com.example.instagrampage.data.repository.Repository
+import com.example.instagrampage.ui.adapters.PostAdapter
 import com.example.instagrampage.util.Result
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
@@ -16,36 +17,44 @@ class HomeViewModel(
 
     private val TAG = "HomeViewModel"
 
-    private val _posts = MutableLiveData<Result<List<Post>>>()
-    val posts: LiveData<Result<List<Post>>>
-        get() = _posts
-    private var postsJob: Job? = null
-
-    private val _stories = MutableLiveData<Result<List<Story>>>()
-    val stories: LiveData<Result<List<Story>>>
-        get() = _stories
-    private var storiesJob: Job? = null
+    private val _items = MutableLiveData<List<PostAdapter.Item>>()
+    val items: LiveData<List<PostAdapter.Item>>
+        get() = _items
+    private var itemsJob: Job? = null
 
     private var currentPage: Int = 0
 
     init {
-        collectStories()
-        collectPosts()
+        collectData()
     }
 
-    fun collectStories() {
-        storiesJob?.cancel()
-        storiesJob = viewModelScope.launch {
-            repository.getStories().collect { _stories.value = it }
-        }
-    }
-
-    fun collectPosts() {
+    fun collectData() {
         currentPage++
-        postsJob?.cancel()
-        postsJob = viewModelScope.launch {
-            delay(500)
-            repository.getPosts(currentPage * POSTS_PER_PAGE).collect { _posts.value = it }
+        itemsJob?.cancel()
+
+        itemsJob = viewModelScope.launch {
+            combine(repository.getStories(), repository.getPosts(currentPage * POSTS_PER_PAGE)) { stories, posts ->
+                val storiesToShow: PostAdapter.Item.HeaderItem = when (stories.status) {
+                    Result.Status.LOADING -> PostAdapter.Item.HeaderItem(listOf())
+                    Result.Status.SUCCESS -> PostAdapter.Item.HeaderItem(stories.data!!)
+                    Result.Status.ERROR -> PostAdapter.Item.HeaderItem(listOf())
+                }
+                val postsToShow: List<PostAdapter.Item.PostItem> = when (posts.status) {
+                    Result.Status.LOADING -> listOf()
+                    Result.Status.SUCCESS -> posts.data!!.map { PostAdapter.Item.PostItem(it) }
+                    Result.Status.ERROR -> listOf()
+                }
+                val itemsToShow: List<PostAdapter.Item> = mutableListOf<PostAdapter.Item>().apply {
+                    add(storiesToShow)
+                    addAll(postsToShow)
+                    if (postsToShow.isNotEmpty()) add(PostAdapter.Item.FooterItem)
+                }
+                itemsToShow
+            }.filter {
+                it.size > 1
+            }.collect {
+                _items.value = it
+            }
         }
     }
 
