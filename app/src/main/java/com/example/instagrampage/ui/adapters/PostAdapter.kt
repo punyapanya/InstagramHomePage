@@ -20,29 +20,39 @@ class PostAdapter : ListAdapter<PostAdapter.Item, RecyclerView.ViewHolder>(DIFF_
     //CALLBACKS
     var onFooterAttachedCallback: () -> Unit = { /* no-op */ }
     var onStoryClickedCallback: (Story) -> Unit = { /* no-op */ }
+    var onPostLikedCallback: (Post) -> Unit = { /* no-op */ }
 
     //ADAPTER BEHAVIOUR OVERRIDDEN
     override fun getItemId(position: Int) = getItem(position).id
 
     override fun getItemViewType(position: Int): Int =
         when (getItem(position)) {
-            is Item.PostItem -> ItemType.POST.ordinal
-            is Item.HeaderItem -> ItemType.HEADER.ordinal
-            is Item.FooterItem -> ItemType.FOOTER.ordinal
+            is Item.Post -> ItemType.POST.ordinal
+            is Item.Header -> ItemType.HEADER.ordinal
+            is Item.Footer -> ItemType.FOOTER.ordinal
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
         when (ItemType.values()[viewType]) {
-            ItemType.POST -> PostViewHolder.createFrom(parent)
+            ItemType.POST -> {
+                val postViewHolder = PostViewHolder.createFrom(parent)
+                postViewHolder.bnd.icLike.setOnClickListener {
+                    val post = (getItem(postViewHolder.adapterPosition) as Item.Post).post
+                    val likes = if (post.isLiked) post.likes - 1 else post.likes + 1
+                    val isLiked = !post.isLiked
+                    onPostLikedCallback(post.copy(likes = likes, isLiked = isLiked))
+                }
+                postViewHolder
+            }
             ItemType.HEADER -> HeaderViewHolder.createFrom(parent, onStoryClickedCallback)
             ItemType.FOOTER -> FooterViewHolder.createFrom(parent)
         }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int): Unit =
         when (val item = getItem(position)) {
-            is Item.PostItem -> (holder as PostViewHolder).bind(item.post)
-            is Item.HeaderItem -> (holder as HeaderViewHolder).bind(item.stories)
-            is Item.FooterItem -> (holder as FooterViewHolder).bind()
+            is Item.Post -> (holder as PostViewHolder).bind(item.post)
+            is Item.Header -> (holder as HeaderViewHolder).bind(item.stories)
+            is Item.Footer -> (holder as FooterViewHolder).bind()
         }
 
     override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
@@ -57,7 +67,7 @@ class PostAdapter : ListAdapter<PostAdapter.Item, RecyclerView.ViewHolder>(DIFF_
 
     //VIEW HOLDERS
     class PostViewHolder(
-        private val bnd: ItemPostBinding
+        val bnd: ItemPostBinding
     ) : RecyclerView.ViewHolder(bnd.root) {
 
         fun bind(post: Post) {
@@ -70,6 +80,8 @@ class PostAdapter : ListAdapter<PostAdapter.Item, RecyclerView.ViewHolder>(DIFF_
                 )
                 tvShowAllComments.text =
                     root.resources.getString(R.string.template_show_all_comments, post.comments)
+                val icLikeResource = if (post.isLiked) R.drawable.ic_like else R.drawable.ic_like_border
+                icLike.setImageResource(icLikeResource)
             }
         }
 
@@ -136,18 +148,18 @@ class PostAdapter : ListAdapter<PostAdapter.Item, RecyclerView.ViewHolder>(DIFF_
 
             override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean =
                 when (oldItem) {
-                    is Item.PostItem -> newItem is Item.PostItem && oldItem.post == newItem.post
-                    is Item.HeaderItem -> newItem is Item.HeaderItem && oldItem.stories == newItem.stories
-                    is Item.FooterItem -> true
+                    is Item.Post -> newItem is Item.Post && oldItem.post == newItem.post
+                    is Item.Header -> newItem is Item.Header && oldItem.stories == newItem.stories
+                    is Item.Footer -> true
                 }
         }
     }
 
     //SEALED AND ENUM CLASSES
     sealed class Item(val id: Long) {
-        class PostItem(val post: Post) : Item(post.postId)
-        class HeaderItem(val stories: List<Story>) : Item(Long.MIN_VALUE)
-        object FooterItem : Item(Long.MIN_VALUE + 1)
+        class Post(val post: com.example.instagrampage.data.local.db.entities.Post) : Item(post.postId)
+        class Header(val stories: List<Story>) : Item(Long.MIN_VALUE)
+        object Footer : Item(Long.MIN_VALUE + 1)
     }
 
     enum class ItemType { HEADER, POST, FOOTER }

@@ -22,38 +22,26 @@ class LocalDataSourceImpl(
     }
 
     override suspend fun insertPosts(posts: List<Post>) {
-        withContext(Dispatchers.IO) {
-            contentDao.insertPosts(posts)
-        }
+        contentDao.insertPosts(posts)
     }
 
     override suspend fun insertStories(stories: List<Story>) {
-        withContext(Dispatchers.IO) {
-            contentDao.insertStories(stories)
-        }
+        contentDao.insertStories(stories)
     }
 
     override suspend fun insertPost(post: Post) {
-        withContext(Dispatchers.IO) {
-            contentDao.insertPost(post)
-        }
+        contentDao.insertPost(post)
     }
 
     override suspend fun insertStory(story: Story) {
-        withContext(Dispatchers.IO) {
-            contentDao.insertStory(story)
-        }
+        contentDao.insertStory(story)
     }
 
     override suspend fun deletePosts() {
-        withContext(Dispatchers.IO) {
-            contentDao.deletePosts()
-        }
+        contentDao.deletePosts()
     }
 
     override suspend fun deleteStories() {
-        withContext(Dispatchers.IO) {
-            contentDao.deleteStories()
-        }
+        contentDao.deleteStories()
     }
 }

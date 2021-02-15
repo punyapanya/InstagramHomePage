@@ -52,7 +52,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.items.observe(viewLifecycleOwner) { items: List<PostAdapter.Item> ->
+        viewModel.items.observe(viewLifecycleOwner) { items ->
+            Log.d(TAG, "setupObservers: items submitting ${items.size}")
             rvAdapter.submitList(items) {
                 if (bnd.rvHome.adapter == null) bnd.rvHome.adapter = rvAdapter
             }
@@ -80,8 +81,9 @@ class HomeFragment : Fragment() {
         }
         rvAdapter = PostAdapter()
         rvAdapter.setHasStableIds(true)
-        rvAdapter.onFooterAttachedCallback = { viewModel.collectData() }
+        rvAdapter.onFooterAttachedCallback = { viewModel.collectItems() }
         rvAdapter.onStoryClickedCallback = { viewModel.insertStory(it) }
+        rvAdapter.onPostLikedCallback = { viewModel.insertPost(it) }
     }
 
     private fun setupViewModel() {

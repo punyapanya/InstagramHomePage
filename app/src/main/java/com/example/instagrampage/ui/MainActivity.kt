@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         bnd = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bnd.root)
-
         inject()
         setupTestDatabase()
 
@@ -54,7 +53,7 @@ class MainActivity : AppCompatActivity() {
             repository.deletePosts()
             repository.deleteStories()
 
-            val post = Post("jennie_bp_kkkk", "I did a lot of things today", 65984, 1230, "", "")
+            val post = Post("jennie_bp_kkkk", "I did a lot of things today", 65984, 1230, "", "", false)
             val posts = mutableListOf<Post>()
             for (i in 1..100) {
                 posts.add(post.copy(authorName = "jennie_bp_kkkk$i"))

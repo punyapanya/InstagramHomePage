@@ -18,19 +18,19 @@ class StoriesAdapter : ListAdapter<Story, StoriesAdapter.StoryViewHolder>(DIFF_C
     override fun getItemId(position: Int) = getItem(position).storyId
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryViewHolder {
-        val viewHolder = StoryViewHolder.from(parent, onStoryClickedCallback)
-        viewHolder.itemView.setOnClickListener {
-            viewHolder.onStoryClicked(getItem(viewHolder.adapterPosition))
+        val storyViewHolder = StoryViewHolder.from(parent)
+        storyViewHolder.itemView.setOnClickListener {
+            val story = getItem(storyViewHolder.adapterPosition)
+            if (!story.isWatched) onStoryClickedCallback(story.copy(isWatched = true))
         }
-        return viewHolder
+        return storyViewHolder
     }
 
     override fun onBindViewHolder(holder: StoryViewHolder, position: Int) = holder.bind(getItem(position))
 
     //VIEW HOLDERS
     class StoryViewHolder(
-        private val bnd: ItemStoriesBinding,
-        private val onStoryClickedCallback: (story: Story) -> Unit
+        private val bnd: ItemStoriesBinding
     ) : RecyclerView.ViewHolder(bnd.root) {
 
         fun bind(story: Story) {
@@ -41,14 +41,9 @@ class StoriesAdapter : ListAdapter<Story, StoriesAdapter.StoryViewHolder>(DIFF_C
             }
         }
 
-        fun onStoryClicked(story: Story) {
-            onStoryClickedCallback(story.copy(isWatched = true))
-        }
-
         companion object {
-            fun from(parent: ViewGroup, onStoryClickedCallback: (Story) -> Unit) = StoryViewHolder(
-                ItemStoriesBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-                onStoryClickedCallback
+            fun from(parent: ViewGroup) = StoryViewHolder(
+                ItemStoriesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             )
         }
     }

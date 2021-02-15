@@ -78,7 +78,7 @@
         android:layout_marginTop="@dimen/app_bar_padding"
         android:layout_marginBottom="@dimen/app_bar_padding"
         android:padding="@dimen/icon_padding"
-        android:src="@drawable/ic_like"
+        android:src="@drawable/ic_like_border"
         app:layout_constraintBottom_toTopOf="@+id/guidelineDown"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toStartOf="parent"

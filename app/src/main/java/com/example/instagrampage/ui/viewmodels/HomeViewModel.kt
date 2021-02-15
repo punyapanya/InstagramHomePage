@@ -1,14 +1,17 @@
 package com.example.instagrampage.ui.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.*
+import com.example.instagrampage.data.local.db.entities.Post
 import com.example.instagrampage.data.local.db.entities.Story
 import com.example.instagrampage.data.repository.Repository
 import com.example.instagrampage.ui.adapters.PostAdapter
 import com.example.instagrampage.util.Result
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
@@ -25,42 +28,58 @@ class HomeViewModel(
     private var currentPage: Int = 0
 
     init {
-        collectData()
+        collectItems()
     }
 
-    fun collectData() {
+    fun collectItems() {
         currentPage++
         itemsJob?.cancel()
 
         itemsJob = viewModelScope.launch {
-            combine(repository.getStories(), repository.getPosts(currentPage * POSTS_PER_PAGE)) { stories, posts ->
-                val storiesToShow: PostAdapter.Item.HeaderItem = when (stories.status) {
-                    Result.Status.LOADING -> PostAdapter.Item.HeaderItem(listOf())
-                    Result.Status.SUCCESS -> PostAdapter.Item.HeaderItem(stories.data!!)
-                    Result.Status.ERROR -> PostAdapter.Item.HeaderItem(listOf())
+            val storiesFlow = repository.getStories().transform { stories ->
+                when (stories.status) {
+                    Result.Status.LOADING -> Log.d(TAG, "collectItems: stories loading")
+                    Result.Status.SUCCESS -> {
+                        Log.d(TAG, "collectItems: stories success")
+                        emit(PostAdapter.Item.Header(stories.data!!))
+                    }
+                    Result.Status.ERROR -> Log.d(TAG, "collectItems: stories error")
                 }
-                val postsToShow: List<PostAdapter.Item.PostItem> = when (posts.status) {
-                    Result.Status.LOADING -> listOf()
-                    Result.Status.SUCCESS -> posts.data!!.map { PostAdapter.Item.PostItem(it) }
-                    Result.Status.ERROR -> listOf()
+            }
+            val postsFlow = repository.getPosts(currentPage * POSTS_PER_PAGE).transform { posts ->
+                when (posts.status) {
+                    Result.Status.LOADING -> Log.d(TAG, "collectItems: posts loading")
+                    Result.Status.SUCCESS -> {
+                        Log.d(TAG, "collectItems: posts success")
+                        emit(posts.data!!.map { post -> PostAdapter.Item.Post(post) })
+                    }
+                    Result.Status.ERROR -> Log.d(TAG, "collectItems: posts error")
                 }
-                val itemsToShow: List<PostAdapter.Item> = mutableListOf<PostAdapter.Item>().apply {
-                    add(storiesToShow)
-                    addAll(postsToShow)
-                    if (postsToShow.isNotEmpty()) add(PostAdapter.Item.FooterItem)
+            }
+            val itemsFlow = combine(storiesFlow, postsFlow) { stories, posts ->
+                Log.d(TAG, "collectItems: stories and posts combining")
+                val items: List<PostAdapter.Item> = mutableListOf<PostAdapter.Item>().apply {
+                    add(stories)
+                    addAll(posts)
+                    add(PostAdapter.Item.Footer)
                 }
-                itemsToShow
-            }.filter {
-                it.size > 1
-            }.collect {
+                items
+            }
+            itemsFlow.collect {
                 _items.value = it
             }
         }
     }
 
     fun insertStory(story: Story) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.insertStory(story)
+        }
+    }
+
+    fun insertPost(post: Post) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.insertPost(post)
         }
     }
 
