@@ -12,20 +12,20 @@ class DatabaseModule(
     private val mAppContext: Context
 ) {
 
-    @Provides
-    fun provideAppContext(): Context {
-        return mAppContext
-    }
+  @Provides
+  fun provideAppContext(): Context {
+    return mAppContext
+  }
 
-    @Provides
-    @Singleton
-    fun provideAppDatabase(appContext: Context): AppDatabase {
-        return AppDatabase.getDatabase(appContext)
-    }
+  @Provides
+  @Singleton
+  fun provideAppDatabase(appContext: Context): AppDatabase {
+    return AppDatabase.getDatabase(appContext)
+  }
 
-    @Provides
-    @Singleton
-    fun provideContentDao(database: AppDatabase): ContentDao {
-        return database.contentDao()
-    }
+  @Provides
+  @Singleton
+  fun provideContentDao(database: AppDatabase): ContentDao {
+    return database.contentDao()
+  }
 }

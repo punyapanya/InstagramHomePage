@@ -12,37 +12,37 @@ class RepositoryImpl(
     private val localDataSource: LocalDataSource
 ) : Repository {
 
-    override fun getPosts(amount: Int): Flow<Result<List<Post>>> = flow {
-        emit(Result.loading<List<Post>>())
-        emitAll(localDataSource.getPosts(amount))
-    }
+  override fun getPosts(amount: Int): Flow<Result<List<Post>>> = flow {
+    emit(Result.loading<List<Post>>())
+    emitAll(localDataSource.getPosts(amount))
+  }
 
-    override fun getStories(): Flow<Result<List<Story>>> = flow {
-        emit(Result.loading<List<Story>>())
-        emitAll(localDataSource.getStories())
-    }
+  override fun getStories(): Flow<Result<List<Story>>> = flow {
+    emit(Result.loading<List<Story>>())
+    emitAll(localDataSource.getStories())
+  }
 
-    override suspend fun insertPosts(posts: List<Post>) {
-        localDataSource.insertPosts(posts)
-    }
+  override suspend fun insertPosts(posts: List<Post>) {
+    localDataSource.insertPosts(posts)
+  }
 
-    override suspend fun insertStories(stories: List<Story>) {
-        localDataSource.insertStories(stories)
-    }
+  override suspend fun insertStories(stories: List<Story>) {
+    localDataSource.insertStories(stories)
+  }
 
-    override suspend fun insertPost(post: Post) {
-        localDataSource.insertPost(post)
-    }
+  override suspend fun insertPost(post: Post) {
+    localDataSource.insertPost(post)
+  }
 
-    override suspend fun insertStory(story: Story) {
-        localDataSource.insertStory(story)
-    }
+  override suspend fun insertStory(story: Story) {
+    localDataSource.insertStory(story)
+  }
 
-    override suspend fun deletePosts() {
-        localDataSource.deletePosts()
-    }
+  override suspend fun deletePosts() {
+    localDataSource.deletePosts()
+  }
 
-    override suspend fun deleteStories() {
-        localDataSource.deleteStories()
-    }
+  override suspend fun deleteStories() {
+    localDataSource.deleteStories()
+  }
 }

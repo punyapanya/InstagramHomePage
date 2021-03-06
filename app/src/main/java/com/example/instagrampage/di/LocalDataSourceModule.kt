@@ -10,9 +10,9 @@ import javax.inject.Singleton
 @Module
 class LocalDataSourceModule {
 
-    @Provides
-    @Singleton
-    fun provideLocalDataSource(contentDao: ContentDao): LocalDataSource {
-        return LocalDataSourceImpl(contentDao)
-    }
+  @Provides
+  @Singleton
+  fun provideLocalDataSource(contentDao: ContentDao): LocalDataSource {
+    return LocalDataSourceImpl(contentDao)
+  }
 }

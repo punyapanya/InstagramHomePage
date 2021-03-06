@@ -7,19 +7,19 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocalDataSource {
 
-    fun getPosts(amount: Int): Flow<Result<List<Post>>>
+  fun getPosts(amount: Int): Flow<Result<List<Post>>>
 
-    fun getStories(): Flow<Result<List<Story>>>
+  fun getStories(): Flow<Result<List<Story>>>
 
-    suspend fun insertPosts(posts: List<Post>)
+  suspend fun insertPosts(posts: List<Post>)
 
-    suspend fun insertStories(stories: List<Story>)
+  suspend fun insertStories(stories: List<Story>)
 
-    suspend fun insertPost(post: Post)
+  suspend fun insertPost(post: Post)
 
-    suspend fun insertStory(story: Story)
+  suspend fun insertStory(story: Story)
 
-    suspend fun deletePosts()
+  suspend fun deletePosts()
 
-    suspend fun deleteStories()
+  suspend fun deleteStories()
 }

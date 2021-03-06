@@ -10,9 +10,9 @@ import javax.inject.Singleton
 @Module
 class RepositoryModule {
 
-    @Provides
-    @Singleton
-    fun provideRepository(localDataSource: LocalDataSource): Repository {
-        return RepositoryImpl(localDataSource)
-    }
+  @Provides
+  @Singleton
+  fun provideRepository(localDataSource: LocalDataSource): Repository {
+    return RepositoryImpl(localDataSource)
+  }
 }

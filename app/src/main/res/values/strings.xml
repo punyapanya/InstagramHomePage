@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">InstagramPage</string>
+  <string name="app_name">InstagramPage</string>
 
-    <string name="template_likes">Likes: %1$d</string>
-    <string name="template_title">&lt;b>%1$s&lt;/b> %2$s</string>
-    <string name="template_show_all_comments">Show all comments (%1$d)</string>
+  <string name="template_likes">Likes: %1$d</string>
+  <string name="template_title">&lt;b>%1$s&lt;/b> %2$s</string>
+  <string name="template_show_all_comments">Show all comments (%1$d)</string>
 
-    <string name="instagram">Instagram</string>
-    <string name="comments">Comments</string>
-    <string name="direct">Direct</string>
-    <string name="send">Send</string>
+  <string name="instagram">Instagram</string>
+  <string name="comments">Comments</string>
+  <string name="direct">Direct</string>
+  <string name="send">Send</string>
 </resources>

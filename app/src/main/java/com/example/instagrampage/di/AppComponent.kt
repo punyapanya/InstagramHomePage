@@ -9,6 +9,6 @@ import javax.inject.Singleton
 @Component(modules = [DatabaseModule::class, LocalDataSourceModule::class, RepositoryModule::class])
 interface AppComponent {
 
-    fun inject(activity: MainActivity)
-    fun inject(fragment: HomeFragment)
+  fun inject(activity: MainActivity)
+  fun inject(fragment: HomeFragment)
 }

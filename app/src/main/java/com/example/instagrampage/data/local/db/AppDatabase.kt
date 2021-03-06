@@ -14,22 +14,22 @@ import com.example.instagrampage.data.local.db.entities.Story
 )
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun contentDao(): ContentDao
+  abstract fun contentDao(): ContentDao
 
-    companion object {
-        @Volatile
-        private var instance: AppDatabase? = null
+  companion object {
+    @Volatile
+    private var instance: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase =
-            instance ?: synchronized(this) {
-                instance ?: buildDatabase(context).also {
-                    instance = it
-                }
-            }
+    fun getDatabase(context: Context): AppDatabase =
+        instance ?: synchronized(this) {
+          instance ?: buildDatabase(context).also {
+            instance = it
+          }
+        }
 
-        private fun buildDatabase(appContext: Context) =
-            Room.databaseBuilder(appContext, AppDatabase::class.java, "instagram")
-                .fallbackToDestructiveMigration()
-                .build()
-    }
+    private fun buildDatabase(appContext: Context) =
+        Room.databaseBuilder(appContext, AppDatabase::class.java, "instagram")
+            .fallbackToDestructiveMigration()
+            .build()
+  }
 }
